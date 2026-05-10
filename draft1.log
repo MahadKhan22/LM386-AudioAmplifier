@@ -1,0 +1,15 @@
+LTspice 24.1.10 for Windows
+Circuit: C:\Users\Mahad\OneDrive\Documents\NUST\Semester_2\ENA_EE-211\project\Afrotechmods\draft1.net
+Start Time: Sun May 10 13:29:42 2026
+solver = Normal
+Maximum thread count: 8
+tnom = 27
+temp = 27
+method = trap
+Direct Newton iteration for .op point succeeded.
+Total elapsed time: 0.133 seconds.
+
+Files loaded:
+C:\Users\Mahad\OneDrive\Documents\NUST\Semester_2\ENA_EE-211\project\Afrotechmods\draft1.net
+C:\Users\Mahad\AppData\Local\LTspice\lib\sub\LM386.LIB
+

@@ -1,0 +1,72 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{circuitikz}
+\usetikzlibrary{calc}
+\begin{document}
+\begin{circuitikz}[american]
+% ============================================================
+% LM386 Audio Amplifier — using dipchip (generic 8-pin IC)
+% ============================================================
+% --- Input: V1 (AC source) + R1 ---
+\draw (2,0) node[ground]{}
+    to[sV, l=$V_1$, name=V1src] (2,1.72);
+\node[below=8pt] at (V1src) {};
+\draw (2,1.72) to[R, l=$R_1$=1k] (4.5,1.72);
+% --- LM386 as a DIP-8 chip ---
+% Pin layout (counter-clockwise from top-left, standard DIP convention):
+%   1: Gain     8: Gain
+%   2: -In      7: Bypass
+%   3: +In      6: V+
+%   4: GND      5: Vout
+\node[dipchip, num pins=8, hide numbers] (U1) at (6,2) {\small{LM386\_TI}};
+% Pin function labels inside the chip body
+\node[font=\tiny, anchor=west] at (U1.bpin 1) {1 G};
+\node[font=\tiny, anchor=west] at (U1.bpin 2) {2 $-$};
+\node[font=\tiny, anchor=west] at (U1.bpin 3) {3 $+$};
+\node[font=\tiny, anchor=west] at (U1.bpin 4) {4 GND};
+\node[font=\tiny, anchor=east] at (U1.bpin 5) {Out 5};
+\node[font=\tiny, anchor=east] at (U1.bpin 6) {V+ 6};
+\node[font=\tiny, anchor=east] at (U1.bpin 7) {Byp 7};
+\node[font=\tiny, anchor=east] at (U1.bpin 8) {G 8};
+% --- Connections ---
+% Pin 3 (+In): from R1
+\draw (U1.pin 3) -| (4.5, 1.72);
+% Pin 2 (-In): goes left and down, hops over the pin 3 wire
+\draw (U1.pin 2)
+    -| ($(U1.pin 3) + (-0.6, 0.1)$)
+    arc (90:-90:0.1)
+    -- ($(U1.pin 2) + (-0.6, -1.15)$);
+% Pin 4 (GND)
+\draw (U1.pin 4) -- ++(-0.6,0) node[ground]{};
+% Pin 7 (Bypass) -> C1 -> GND, hops over pin 6 (V+) and pin 5 (Out) wires
+\draw (U1.pin 7) -- ++(0.3,0) coordinate (byp);
+\draw (byp)
+    -- ($(U1.pin 6) + (0.3, 0.1)$)
+    arc (90:-90:0.1)
+    -- ($(U1.pin 5) + (0.3, 0.1)$)
+    arc (90:-90:0.1)
+    -- ($(byp) + (0, -1.8)$)
+    to[C, l_=$C_1$=100$\mu$] ++(0,-1) node[ground]{};
+% --- V+ rail (Pin 6) and decoupling caps ---
+\draw (U1.pin 6) -- ++(1,0) coordinate (vcc_in);
+\draw (vcc_in) -- ++(0,2.5) coordinate (vcc1);
+% C5 (100n ceramic) decoupling
+\draw (vcc1) to[C, l_=$C_5$=100n] ++(-2,0) node[ground]{};
+\node[black, font=\small] at ($(vcc1)+(-1,-0.5)$) {ceramic};
+% C2 (100u) bulk decoupling
+\draw (vcc1) -- ++(0,1.5) coordinate (vcc2);
+\draw (vcc2) to[C, l_=$C_2$=100$\mu$] ++(-2,0) node[ground]{};
+% V2 = 9V supply
+\draw (vcc2) -- ++(1,0) coordinate (v2top);
+\draw (v2top) to[V, l^={$V_2$=9V}] ++(0,-2.5) node[ground]{};
+% --- Output network ---
+\draw (U1.pin 5) -- ++(0,0) -| (9,1.16) coordinate (out);
+% Zobel network: C3 (100n) + R2 (1k) to GND
+\draw (out) to[C, l_=$C_3$=100n] ++(0,-1.3)
+    to[R, l_=$R_2$=1k] ++(0,-1.3) node[ground]{};
+% Output coupling C4 -> Speaker
+\draw (out) to[C, l=$C_4$=1m] ++(2,0)
+    to[loudspeaker, l=Speaker=8\,$\Omega$] ++(2,0) node[ground]{};
+
+    
+\end{circuitikz}
+\end{document}
